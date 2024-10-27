@@ -1,23 +1,200 @@
-import logo from './logo.svg';
+
 import './App.css';
 
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import HeroSection from './components/HeroSection';
+import {useState,useEffect} from "react";
+import axios from "axios";
+import Phonepage from './components/Phonepage';
+import Footer from "./components/Footer";
+import FindDoctors from './components/FindDoctors';
+import Bookings from './components/Bookings';
+
+
 function App() {
+  const initialState = [
+    {
+      day: "Today",
+      morning: ["09:00 AM"],
+      afternoon: ["01:00 PM", "01:30 PM", "02:00 PM"],
+      evening: ["05:00 PM", "05:30 PM", "06:00 PM"],
+    },
+    {
+      day: "Tomorrow",
+      morning: ["10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM"],
+      afternoon: ["02:00 PM", "02:30 PM", "03:00 PM", "03:30 PM"],
+      evening: ["06:00 PM", "06:30 PM", "07:00 PM", "07:30 PM"],
+    },
+    {
+      day: "Mon, 28 October",
+      morning: [ "09:00 AM", "09:30 AM", "10:00 AM"],
+      afternoon: ["12:30 PM", "01:00 PM", "01:30 PM", "02:00 PM"],
+      evening: ["04:30 PM", "05:00 PM", "05:30 PM", "06:00 PM"],
+    },
+    {
+      day: "Tue, 29 October",
+      morning: ["09:00 AM", "09:30 AM", "10:00 AM"],
+      afternoon: ["01:00 PM", "01:30 PM", "02:00 PM", "02:30 PM", "03:00 PM"],
+      evening: ["05:00 PM", "05:30 PM", "06:00 PM", "06:30 PM", "07:00 PM"],
+    },
+    {
+      day: "Wed, 30 October",
+      morning: ["08:00 AM", "08:30 AM"],
+      afternoon: ["12:00 PM", "12:30 PM", "01:00 PM", "01:30 PM"],
+      evening: ["04:00 PM", "04:30 PM", "05:00 PM", "05:30 PM", "06:00 PM"],
+    },
+    {
+      day: "Thurs,31 October",
+      morning: ["09:00 AM", "09:30 AM", "10:00 AM"],
+      afternoon: ["01:00 PM", "01:30 PM", "02:00 PM", "02:30 PM"],
+      evening: ["05:00 PM", "05:30 PM", "06:00 PM"],
+    },
+    {
+      day: "Fri, 1 November",
+      morning: ["09:30 AM"],
+      afternoon: ["01:00 PM"],
+      evening: ["06:00 PM", "06:30 PM"],
+    },
+    {
+      day: "Sat,2 November",
+      morning: ["10:00 AM", "10:30 AM", "11:00 AM"],
+      afternoon: ["01:00 PM", "01:30 PM", "02:00 PM"],
+      evening: ["05:00 PM", "05:30 PM"],
+    },
+    {
+      day: "Sun, 3 November",
+      morning: ["08:00 AM", "08:30 AM", "09:00 AM", "09:30 AM"],
+      afternoon: ["12:00 PM", "12:30 PM", "01:00 PM"],
+      evening: ["04:00 PM", "04:30 PM", "05:00 PM", "05:30 PM", "06:00 PM"],
+    },
+    
+  ];
+  const [states, setStates] = useState([]);
+  const [cities, setCities] = useState([]);
+  const [selectedState, setSelectedState] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
+  const [medicalCenters, setMedicalCenters] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const [appointments, setAppointments] = useState([]);
+  const addAppointment = (hospital, date, time, state, city) => {
+    setAppointments([...appointments, { hospital, date, time, state, city }]);
+  };
+
+  const [availableSlots, setAvailableSlots] = useState(initialState);
+  
+  useEffect(() => {
+    const fetchStates = async () => {
+      try {
+        const response = await axios.get(
+          "https://meddata-backend.onrender.com/states"
+        );
+        setStates(response.data);
+      } catch (error) {
+        console.log("Error fetching states");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStates();
+  }, []);
+  useEffect(() => {
+    const fetchCities = async () => {
+      if (selectedState) {
+        try {
+          const response = await axios.get(
+            `https://meddata-backend.onrender.com/cities/${selectedState}`
+          );
+          setCities(response.data);
+        } catch (error) {
+          console.log("Error fetching cities");
+        }
+      }
+    };
+
+    const fetchSelectedMedicalCentres = async () =>{
+      if (selectedState) {
+        try {
+          const response = await axios.get(
+            `https://meddata-backend.onrender.com/data?state=${selectedState}`
+          );
+          setMedicalCenters(response.data);          
+        } catch (error) {
+          console.log("Error fetching medical centers based on state");          
+        }
+      }
+    }
+
+
+    fetchCities();
+    fetchSelectedMedicalCentres();
+  }, [selectedState]);
+  useEffect(() => {
+    const fetchMedicalCenters = async () => {
+      if (selectedState || selectedCity) {
+        try {
+          const response = await axios.get(
+            `https://meddata-backend.onrender.com/data?state=${selectedState}&city=${selectedCity}`
+          );
+          setMedicalCenters(response.data);
+          console.log(response.data);
+        } catch (error) {
+          console.log("Error fetching medical centers");
+        }
+      }
+    };
+
+    fetchMedicalCenters();
+  }, [selectedCity]);
+
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+     
+              <Routes>
+        <Route
+          path="/"
+          element={
+            <HeroSection
+              selectedState={selectedState}
+              setSelectedState={setSelectedState}
+              states={states}
+              selectedCity={selectedCity}
+              setSelectedCity={setSelectedCity}
+              cities={cities}
+            />
+          }
+        />
+        <Route
+          path="/findDoctor"
+          element={
+            <FindDoctors
+              selectedState={selectedState}
+              setSelectedState={setSelectedState}
+              states={states}
+              selectedCity={selectedCity}
+              setSelectedCity={setSelectedCity}
+              cities={cities}
+              medicalCenters={medicalCenters}
+              appointments={appointments}
+              addAppointment={addAppointment}
+              availableSlots={availableSlots}
+              setAvailableSlots={setAvailableSlots}
+
+            />
+          }
+        />
+        <Route
+          path="/myBookings"
+          element={
+            <Bookings
+            appointments={appointments}
+            />
+          }
+        />
+      </Routes>
+         <Phonepage/>
+         <Footer/>     
     </div>
   );
 }

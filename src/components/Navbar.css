@@ -1,0 +1,43 @@
+p{
+    background-color:  rgba(42, 167, 255, 1);
+    color:white;
+
+    height:40px;
+    font-size: 20px;
+}
+.navcomp{
+    display: flex;
+    justify-content: space-between;
+    
+}
+.navheading{
+    display: flex;
+    margin:5px;
+    justify-content:space-between;
+    a{
+      margin: 0px 20px;
+    color: rgba(16, 40, 81, 1);
+    font-family: Poppins;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 400;
+    height:21px;
+    width:87px;
+    text-align: left;
+    }
+}
+button{
+  background: rgba(42, 168, 255, 1);
+    width: 130px;
+    height: 40px;
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 1);
+    font-family: Poppins;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 21px;
+    letter-spacing: 0.02em;
+    margin-left: 30px;
+    cursor: pointer;
+}
+  
